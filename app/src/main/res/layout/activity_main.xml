@@ -1,11 +1,51 @@
-<!-- res/layout/activity_main.xml -->
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:padding="16dp">
 
     <!-- Header layout for column titles -->
+    <TextView
+        android:id="@+id/tvHeader"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Employee List"
+        android:textSize="20sp"
+        android:textStyle="bold"
+        android:layout_marginBottom="16dp"
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true" />
 
+    <!-- Search EditText and Search Button -->
+    <LinearLayout
+        android:layout_width="285dp"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/tvHeader"
+        android:layout_marginTop="3dp"
+        android:gravity="center_vertical"
+        android:orientation="horizontal">
+
+        <EditText
+            android:id="@+id/etSearch"
+            android:layout_width="0dp"
+            android:layout_height="35dp"
+            android:layout_weight="1"
+            android:hint="Search"
+            android:inputType="text"
+            android:padding="8dp" />
+
+        <ImageButton
+            android:id="@+id/ivSearch"
+            android:layout_width="wrap_content"
+            android:layout_height="54dp"
+            android:layout_marginStart="0dp"
+            android:background="?android:attr/selectableItemBackgroundBorderless"
+            android:contentDescription="Search Employee"
+            android:padding="8dp"
+            android:scaleType="centerInside"
+            android:src="@drawable/baseline_search_24" />
+    </LinearLayout>
+
+    <!-- Add Employee Button -->
     <ImageButton
         android:id="@+id/ivAdd"
         android:layout_width="79dp"
@@ -19,16 +59,6 @@
         android:src="@drawable/baseline_add_circle_24"
         android:background="?android:attr/selectableItemBackgroundBorderless"
         android:scaleType="centerInside" />
-
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginEnd="37dp"
-        android:layout_toStartOf="@+id/ivAdd"
-        android:paddingBottom="16dp"
-        android:text="Employee List"
-        android:textSize="20sp"
-        android:textStyle="bold" />
 
     <LinearLayout
         android:id="@+id/llHeaders"
@@ -72,12 +102,12 @@
             android:textStyle="bold" />
     </LinearLayout>
 
+    <!-- Employee ListView -->
     <ListView
         android:id="@+id/lvEmployee"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_below="@id/llHeaders"
-        android:layout_marginTop="8dp"
-        />
+        android:layout_marginTop="8dp" />
 
 </RelativeLayout>
