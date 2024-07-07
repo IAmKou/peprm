@@ -1,7 +1,8 @@
 package com.example.peprm;
 
-// Employee.java
-public class Employee {
+import java.io.Serializable;
+
+public class Employee implements Serializable {
     private int id;
     private String fullName;
     private String date;
@@ -22,11 +23,23 @@ public class Employee {
         return fullName;
     }
 
+    public void setFullName(String fullName) {
+        this.fullName = fullName;
+    }
+
     public String getDate() {
         return date;
     }
 
+    public void setDate(String date) {
+        this.date = date;
+    }
+
     public double getSalary() {
         return salary;
+    }
+
+    public void setSalary(double salary) {
+        this.salary = salary;
     }
 }

@@ -1,4 +1,6 @@
-package com.example.peprm;// MainActivity.java
+package com.example.peprm;
+
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.Gravity;
 import android.view.View;
@@ -6,11 +8,16 @@ import android.widget.Button;
 import android.widget.TableLayout;
 import android.widget.TableRow;
 import android.widget.TextView;
+
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+
 import java.util.ArrayList;
 import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
+
+    private static final int REQUEST_CODE_UPDATE = 1;
 
     private TableLayout employeeTable;
     private List<Employee> employeeList;
@@ -53,11 +60,12 @@ public class MainActivity extends AppCompatActivity {
             salary.setText(String.valueOf(employee.getSalary()));
             salary.setGravity(Gravity.CENTER);
 
-            // Action Buttons
             Button updateButton = new Button(this);
             updateButton.setText("Update");
             updateButton.setOnClickListener(v -> {
-                // Handle update action
+                Intent intent = new Intent(MainActivity.this, Update.class);
+                intent.putExtra("employee", employee);
+                startActivityForResult(intent, REQUEST_CODE_UPDATE);
             });
 
             Button deleteButton = new Button(this);
@@ -91,6 +99,27 @@ public class MainActivity extends AppCompatActivity {
             tableRow.addView(actionRowWrapper);
 
             employeeTable.addView(tableRow);
+        }
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        if (requestCode == REQUEST_CODE_UPDATE && resultCode == RESULT_OK) {
+            if (data != null && data.hasExtra("updatedEmployee")) {
+                Employee updatedEmployee = (Employee) data.getSerializableExtra("updatedEmployee");
+                for (Employee employee : employeeList) {
+                    if (employee.getId() == updatedEmployee.getId()) {
+                        employee.setFullName(updatedEmployee.getFullName());
+                        employee.setDate(updatedEmployee.getDate());
+                        employee.setSalary(updatedEmployee.getSalary());
+                        break;
+                    }
+                }
+                employeeTable.removeAllViews();
+                addTableRows();
+            }
         }
     }
 }
