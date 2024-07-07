@@ -1,96 +1,138 @@
 package com.example.peprm;// MainActivity.java
+import android.app.Dialog;
 import android.os.Bundle;
-import android.view.Gravity;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
+
 import android.widget.Button;
-import android.widget.TableLayout;
-import android.widget.TableRow;
-import android.widget.TextView;
+import android.widget.EditText;
+import android.widget.ListView;
+import android.widget.ImageButton;
+import android.widget.Toast;
+
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+
 import java.util.ArrayList;
-import java.util.List;
+
 
 public class MainActivity extends AppCompatActivity {
-
-    private TableLayout employeeTable;
-    private List<Employee> employeeList;
+    ImageButton ivAddNew;
+    ListView lv;
+    ArrayAdapter adapter;
+    ArrayList<Employee> dsEmployee = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        ivAddNew = findViewById(R.id.ivAdd);
+        lv = findViewById(R.id.lvEmployee);
+        dsEmployee = EmployeeDao.getAll(MainActivity.this);
+        adapter = new ArrayAdapter(MainActivity.this, android.R.layout.simple_list_item_1, dsEmployee);
+        lv.setAdapter(adapter);
 
-        employeeTable = findViewById(R.id.employeeTable);
-
-        // Sample data
-        employeeList = new ArrayList<>();
-        employeeList.add(new Employee(1, "Ramesh Fadatare", "2022-01-01", 50000));
-        employeeList.add(new Employee(2, "John Cena", "2022-01-02", 60000));
-        employeeList.add(new Employee(3, "Tony Stark", "2022-01-03", 70000));
-        employeeList.add(new Employee(4, "Tom Cruise", "2022-01-04", 80000));
-        employeeList.add(new Employee(5, "Amir Khan", "2022-01-05", 90000));
-
-        addTableRows();
+        ivAddNew.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                showDialogAdd();
+            }
+        });
+        lv.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                Toast.makeText(MainActivity.this, "pos: " + position, Toast.LENGTH_SHORT).show();
+                showDialogEdit(position);
+            }
+        });
     }
 
-    private void addTableRows() {
-        for (Employee employee : employeeList) {
-            TableRow tableRow = new TableRow(this);
+    private void showDialogEdit(int pos){
+        AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
+        LayoutInflater inflater = getLayoutInflater();
+        View view = inflater.inflate(R.layout.activity_edit_delete, null);
+        builder.setView(view);
+        Dialog dialog = builder.create();
+        dialog.show();
 
-            TextView id = new TextView(this);
-            id.setText(String.valueOf(employee.getId()));
-            id.setGravity(Gravity.CENTER);
+        EditText edName = view.findViewById(R.id.editNameCN);
+        EditText edHireDate = view.findViewById(R.id.editHireDateCN);
+        EditText edSalary = view.findViewById(R.id.editSalaryCN);
+        Button btnEdit = view.findViewById(R.id.btnSaveEdit);
+        Button btnDelete = view.findViewById(R.id.btnDelete);
+        Employee em = dsEmployee.get(pos);
+        edName.setText(em.getFullName());
+        edHireDate.setText(em.getHiredate());
+        edSalary.setText(em.getSalary());
 
-            TextView fullName = new TextView(this);
-            fullName.setText(employee.getFullName());
-            fullName.setGravity(Gravity.CENTER);
+        btnEdit.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                em.setFullName(edName.getText().toString());
+                em.setHiredate(edHireDate.getText().toString());
+                em.setSalary(edSalary.getText().toString());
+                if(EmployeeDao.update(MainActivity.this, em)){
+                    Toast.makeText(MainActivity.this, "Edit Successful", Toast.LENGTH_SHORT).show();
+                    dsEmployee.clear();
+                    dsEmployee.addAll(EmployeeDao.getAll(MainActivity.this));
+                    adapter.notifyDataSetChanged();
+                    dialog.dismiss();
+                }else{
+                    Toast.makeText(MainActivity.this, "Edit Failed", Toast.LENGTH_SHORT).show();
+                }
+            }
+        });
 
-            TextView date = new TextView(this);
-            date.setText(employee.getDate());
-            date.setGravity(Gravity.CENTER);
+        btnDelete.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if(EmployeeDao.delete(MainActivity.this, em.getId())){
+                    Toast.makeText(MainActivity.this, "Delete Successful", Toast.LENGTH_SHORT).show();
+                    dsEmployee.clear();
+                    dsEmployee.addAll(EmployeeDao.getAll(MainActivity.this));
+                    adapter.notifyDataSetChanged();
+                    dialog.dismiss();
+                }else{
+                    Toast.makeText(MainActivity.this, "Delete Failed", Toast.LENGTH_SHORT).show();
+                }
+            }
+        });
 
-            TextView salary = new TextView(this);
-            salary.setText(String.valueOf(employee.getSalary()));
-            salary.setGravity(Gravity.CENTER);
-
-            // Action Buttons
-            Button updateButton = new Button(this);
-            updateButton.setText("Update");
-            updateButton.setOnClickListener(v -> {
-                // Handle update action
-            });
-
-            Button deleteButton = new Button(this);
-            deleteButton.setText("Delete");
-            deleteButton.setTextColor(getResources().getColor(android.R.color.white));
-            deleteButton.setBackgroundColor(getResources().getColor(android.R.color.holo_red_dark));
-            deleteButton.setOnClickListener(v -> {
-                // Handle delete action
-            });
-
-            Button addButton = new Button(this);
-            addButton.setText("Add");
-            addButton.setOnClickListener(v -> {
-                // Handle add action
-            });
-
-            TableRow actionRow = new TableRow(this);
-            actionRow.addView(updateButton);
-            actionRow.addView(deleteButton);
-            actionRow.addView(addButton);
-
-            tableRow.addView(id);
-            tableRow.addView(fullName);
-            tableRow.addView(date);
-            tableRow.addView(salary);
-
-            // Wrap action buttons in a horizontal layout to fit in the "Actions" column
-            TableRow actionRowWrapper = new TableRow(this);
-            actionRowWrapper.addView(actionRow);
-
-            tableRow.addView(actionRowWrapper);
-
-            employeeTable.addView(tableRow);
-        }
     }
+
+    private void showDialogAdd(){
+        AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
+        LayoutInflater inflater = getLayoutInflater();
+        View view = inflater.inflate(R.layout.activity_add, null);
+        builder.setView(view);
+        Dialog dialog = builder.create();
+        dialog.show();
+
+        EditText edName = view.findViewById(R.id.editName);
+        EditText edHireDate = view.findViewById(R.id.editHireDate);
+        EditText edSalary = view.findViewById(R.id.editSalary);
+        Button btnSave = view.findViewById(R.id.btnSaveAdd);
+
+        btnSave.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                String name = edName.getText().toString();
+                String hireDate = edHireDate.getText().toString();
+                String salary = edSalary.getText().toString();
+                if(EmployeeDao.insert(MainActivity.this, name, hireDate, salary)){
+                    Toast.makeText(MainActivity.this, "Add Successful", Toast.LENGTH_SHORT).show();
+                    dsEmployee.clear();
+                    dsEmployee.addAll(EmployeeDao.getAll(MainActivity.this));
+                    adapter.notifyDataSetChanged();
+                    dialog.dismiss();
+                }else{
+                    Toast.makeText(MainActivity.this, "Add Failed", Toast.LENGTH_SHORT).show();
+                }
+            }
+        });
+
+    }
+
 }
